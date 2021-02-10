@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "strict": true,
+    "target": "ESNext",
+    "lib": ["ESNext"],
+    "outDir": "dist",
+    "declaration": true
+  },
+  "include": ["lib/**/*.ts", "lib/**/__tests__/*.ts"]
+}

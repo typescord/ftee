@@ -1,0 +1,81 @@
+name: Build
+on:
+  push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '*.*'
+  pull_request:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    name: Build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-16.04, ubuntu-18.04, ubuntu-20.04, windows-2016, windows-2019, macos-10.15]
+
+    steps:
+      - name: Force Git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install Node 15
+        uses: actions/setup-node@v2
+        with:
+          node-version: 15
+
+      - name: Install dependencies
+        run: npx cross-env npm_config_build_from_source=true yarn install
+
+      - name: Package prebuild
+        run: yarn build
+
+      - name: Build TypeScript files
+        run: yarn build-ts --noEmit
+
+      - name: Test
+        run: yarn test
+
+      - name: Lint
+        run: yarn lint
+
+  build_musl:
+    name: Build (musl)
+    runs-on: ubuntu-latest
+    container:
+      image: node:15-alpine
+
+    steps:
+      - name: Setup env with Node 15
+        run: |
+          apk add --update
+          apk add --no-cache ca-certificates git curl build-base python g++ make
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: npm_config_build_from_source=true yarn install
+
+      - name: Package prebuild
+        run: yarn build
+
+      - name: Build TypeScript files
+        run: yarn build-ts --noEmit
+
+      - name: Test
+        run: yarn test
+
+      - name: Lint
+        run: yarn lint
