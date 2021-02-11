@@ -9,7 +9,7 @@
 
 using namespace Napi;
 
-inline Value coerce_to_number_if_need(const Value value) {
+inline Value coerce_to_number_if_needed(const Value value) {
   try {
     std::stoi(value.ToString());
     return value.ToNumber();
@@ -135,7 +135,7 @@ class Encoder {
         const auto k = properties.Get(i);
         const auto v = object.Get(k);
 
-        const int kRet = pack(coerce_to_number_if_need(k), nestLimit - 1);
+        const int kRet = pack(coerce_to_number_if_needed(k), nestLimit - 1);
         if (kRet != 0) {
           return kRet;
         }
