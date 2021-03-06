@@ -17,10 +17,11 @@ using namespace Napi;
 
 #define THROW(env, msg)                              \
   Error::New(env, msg).ThrowAsJavaScriptException(); \
-  isInvalid = true;                                  \
-  printf("[Error %s:%d] %s\n", __FILE__, __LINE__, msg)
+  isInvalid = true;
 
 class Decoder {
+  static constexpr uint8_t FLOAT_LENGTH = 31;
+
  public:
   Decoder(const Env env, const TypedArrayOf<uint8_t>& array)
       : data(array.Data()),
@@ -28,10 +29,9 @@ class Decoder {
         isInvalid(false),
         offset(0),
         env(env) {
-    const auto version = read8();
+    const auto version(read8());
     if (version != FORMAT_VERSION) {
       THROW(env, "Bad version number.");
-      isInvalid = true;
     }
   }
 
@@ -39,10 +39,9 @@ class Decoder {
           bool skipVersion = false)
       : data(data_), size(length_), isInvalid(false), offset(0), env(env) {
     if (!skipVersion) {
-      const auto version = read8();
+      const auto version(read8());
       if (version != FORMAT_VERSION) {
         THROW(env, "Bad version number.");
-        isInvalid = true;
       }
     }
   }
@@ -52,7 +51,7 @@ class Decoder {
       THROW(env, "Reading a byte passes the end of the buffer.");
       return 0;
     }
-    auto val = *reinterpret_cast<const uint8_t*>(data + offset);
+    auto val(*reinterpret_cast<const uint8_t*>(data + offset));
     offset += sizeof(uint8_t);
     return val;
   }
@@ -63,8 +62,8 @@ class Decoder {
       return 0;
     }
 
-    uint16_t val =
-        _erlpack_be16(*reinterpret_cast<const uint16_t*>(data + offset));
+    uint16_t val(
+        _erlpack_be16(*reinterpret_cast<const uint16_t*>(data + offset)));
     offset += sizeof(uint16_t);
     return val;
   }
@@ -75,8 +74,8 @@ class Decoder {
       return 0;
     }
 
-    uint32_t val =
-        _erlpack_be32(*reinterpret_cast<const uint32_t*>(data + offset));
+    uint32_t val(
+        _erlpack_be32(*reinterpret_cast<const uint32_t*>(data + offset)));
     offset += sizeof(uint32_t);
     return val;
   }
@@ -87,8 +86,8 @@ class Decoder {
       return 0;
     }
 
-    uint64_t val =
-        _erlpack_be64(*reinterpret_cast<const uint64_t*>(data + offset));
+    uint64_t val(
+        _erlpack_be64(*reinterpret_cast<const uint64_t*>(data + offset)));
     offset += sizeof(val);
     return val;
   }
@@ -98,9 +97,9 @@ class Decoder {
   Number decodeInteger() { return Number::New(env, (int32_t)read32()); }
 
   Value decodeArray(uint32_t length) {
-    Array array = Array::New(env, length);
+    Array array(Array::New(env, length));
     for (uint32_t i = 0; i < length; ++i) {
-      auto value = unpack();
+      auto value(unpack());
       if (isInvalid) {
         return env.Undefined();
       }
@@ -110,10 +109,10 @@ class Decoder {
   }
 
   Value decodeList() {
-    const uint32_t length = read32();
-    auto array = decodeArray(length);
+    const uint32_t length(read32());
+    auto array(decodeArray(length));
 
-    const auto tailMarker = read8();
+    const auto tailMarker(read8());
     if (tailMarker != NIL_EXT) {
       THROW(env, "List doesn't end with a tail marker, but it must!");
       return env.Undefined();
@@ -127,12 +126,12 @@ class Decoder {
   Array decodeNil() { return Array::New(env, 0); }
 
   Value decodeMap() {
-    const uint32_t length = read32();
-    auto map = Object::New(env);
+    const uint32_t length(read32());
+    auto map(Object::New(env));
 
     for (uint32_t i = 0; i < length; ++i) {
-      const auto key = unpack();
-      const auto value = unpack();
+      const auto key(unpack());
+      const auto value(unpack());
       if (isInvalid) {
         return env.Undefined();
       }
@@ -145,16 +144,16 @@ class Decoder {
   const char* readString(uint32_t length) {
     if (offset + length > size) {
       THROW(env, "Reading sequence past the end of the buffer.");
-      return NULL;
+      return nullptr;
     }
 
-    const uint8_t* str = data + offset;
+    const uint8_t* str(data + offset);
     offset += length;
     return (const char*)str;
   }
 
   Value processAtom(const char* atom, uint16_t length) {
-    if (atom == NULL) {
+    if (atom == nullptr) {
       return env.Undefined();
     }
 
@@ -173,21 +172,20 @@ class Decoder {
   }
 
   Value decodeAtom() {
-    auto length = read16();
-    const char* atom = readString(length);
+    auto length(read16());
+    const char* atom(readString(length));
     return processAtom(atom, length);
   }
 
   Value decodeSmallAtom() {
-    auto length = read8();
-    const char* atom = readString(length);
+    auto length(read8());
+    const char* atom(readString(length));
     return processAtom(atom, length);
   }
 
   Value decodeFloat() {
-    const uint8_t FLOAT_LENGTH = 31;
-    const char* floatStr = readString(FLOAT_LENGTH);
-    if (floatStr == NULL) {
+    const char* floatStr(readString(FLOAT_LENGTH));
+    if (floatStr == nullptr) {
       return env.Undefined();
     }
 
@@ -195,7 +193,7 @@ class Decoder {
     char nullTerimated[FLOAT_LENGTH + 1] = {0};
     memcpy(nullTerimated, floatStr, FLOAT_LENGTH);
 
-    auto count = sscanf(nullTerimated, "%lf", &number);
+    auto count(sscanf(nullTerimated, "%lf", &number));
     if (count != 1) {
       THROW(env, "Invalid float encoded.");
       return env.Undefined();
@@ -214,7 +212,7 @@ class Decoder {
   }
 
   Value decodeBig(uint32_t digits) {
-    const uint8_t sign = read8();
+    const uint8_t sign(read8());
 
     if (digits > 8) {
       THROW(env, "Unable to decode big ints larger than 8 bytes");
@@ -222,11 +220,8 @@ class Decoder {
     }
 
     uint64_t value = 0;
-    uint64_t b = 1;
     for (uint32_t i = 0; i < digits; ++i) {
-      uint64_t digit = read8();
-      value += digit * b;
-      b <<= 8;
+      value |= uint64_t(read8()) << i * 8;
     }
 
     if (digits <= 4) {
@@ -234,62 +229,62 @@ class Decoder {
         return Number::New(env, static_cast<uint32_t>(value));
       }
 
-      const bool isSignBitAvailable = (value & (1 << 31)) == 0;
+      const bool isSignBitAvailable((value & (1 << 31)) == 0);
       if (isSignBitAvailable) {
-        int32_t negativeValue = -static_cast<int32_t>(value);
+        int32_t negativeValue(-static_cast<int32_t>(value));
         return Number::New(env, negativeValue);
       }
     }
 
     char outBuffer[32] = {0};  // 9223372036854775807
-    const char* const formatString = sign == 0 ? "%" PRIu64 : "-%" PRIu64;
-    const int res = sprintf(outBuffer, formatString, value);
+    const char* const formatString(sign == 0 ? "%" PRIu64 : "-%" PRIu64);
+    const int res(sprintf(outBuffer, formatString, value));
 
     if (res < 0) {
       THROW(env, "Unable to convert big int to string");
       return env.Undefined();
     }
-    const uint8_t length = static_cast<const uint8_t>(res);
+    const uint8_t length(static_cast<const uint8_t>(res));
 
     return String::New(env, outBuffer, length);
   }
 
   Value decodeSmallBig() {
-    const auto bytes = read8();
+    const auto bytes(read8());
     return decodeBig(bytes);
   }
 
   Value decodeLargeBig() {
-    const auto bytes = read32();
+    const auto bytes(read32());
     return decodeBig(bytes);
   }
 
   Value decodeBinaryAsString() {
-    const auto length = read32();
-    const char* str = readString(length);
-    if (str == NULL) {
+    const auto length(read32());
+    const char* str(readString(length));
+    if (str == nullptr) {
       return env.Undefined();
     }
     return String::New(env, str, length);
   }
 
   Value decodeString() {
-    const auto length = read16();
-    const char* str = readString(length);
-    if (str == NULL) {
+    const auto length(read16());
+    const char* str(readString(length));
+    if (str == nullptr) {
       return env.Undefined();
     }
     return String::New(env, str, length);
   }
 
   Value decodeStringAsList() {
-    const auto length = read16();
+    const auto length(read16());
     if (offset + length > size) {
       THROW(env, "Reading sequence past the end of the buffer.");
       return env.Undefined();
     }
 
-    Array array = Array::New(env, length);
+    Array array(Array::New(env, length));
     for (uint16_t i = 0; i < length; ++i) {
       array.Set(i, decodeSmallInteger());
     }
@@ -302,32 +297,32 @@ class Decoder {
   Value decodeLargeTuple() { return decodeTuple(read32()); }
 
   Value decodeCompressed() {
-    const uint32_t uncompressedSize = read32();
+    const uint32_t uncompressedSize(read32());
 
-    unsigned long sourceSize = uncompressedSize;
-    uint8_t* outBuffer = (uint8_t*)malloc(uncompressedSize);
+    unsigned long sourceSize(uncompressedSize);
+    uint8_t* outBuffer = new uint8_t[uncompressedSize];
     const int ret = uncompress(outBuffer, &sourceSize,
                                (const unsigned char*)(data + offset),
                                (uLong)(size - offset));
 
     offset += sourceSize;
     if (ret != Z_OK) {
-      free(outBuffer);
+      delete[] outBuffer;
       THROW(env, "Failed to uncompresss compressed item");
       return env.Null();
     }
 
     Decoder children(env, outBuffer, uncompressedSize, true);
-    Value value = children.unpack();
-    free(outBuffer);
+    Value value(children.unpack());
+    delete[] outBuffer;
     return value;
   }
 
   Value decodeReference() {
-    auto reference = Object::New(env);
+    auto reference(Object::New(env));
     reference.Set(String::New(env, "node"), unpack());
 
-    Array ids = Array::New(env, 1);
+    Array ids(Array::New(env, 1));
     ids.Set(Number::New(env, 0), Number::New(env, read32()));
     reference.Set(String::New(env, "id"), ids);
 
@@ -337,13 +332,13 @@ class Decoder {
   }
 
   Value decodeNewReference() {
-    auto reference = Object::New(env);
+    auto reference(Object::New(env));
 
-    uint16_t len = read16();
+    uint16_t len(read16());
     reference.Set(String::New(env, "node"), unpack());
     reference.Set(String::New(env, "creation"), Number::New(env, read8()));
 
-    Array ids = Array::New(env, len);
+    Array ids(Array::New(env, len));
     for (uint16_t i = 0; i < len; ++i) {
       ids.Set(i, Number::New(env, read32()));
     }
@@ -353,7 +348,7 @@ class Decoder {
   }
 
   Value decodePort() {
-    auto port = Object::New(env);
+    auto port(Object::New(env));
     port.Set(String::New(env, "node"), unpack());
     port.Set(String::New(env, "id"), Number::New(env, read32()));
     port.Set(String::New(env, "creation"), Number::New(env, read8()));
@@ -361,7 +356,7 @@ class Decoder {
   }
 
   Value decodePID() {
-    auto pid = Object::New(env);
+    auto pid(Object::New(env));
     pid.Set(String::New(env, "node"), unpack());
     pid.Set(String::New(env, "id"), Number::New(env, read32()));
     pid.Set(String::New(env, "serial"), Number::New(env, read32()));
@@ -370,7 +365,7 @@ class Decoder {
   }
 
   Value decodeExport() {
-    auto exp = Object::New(env);
+    auto exp(Object::New(env));
     exp.Set(String::New(env, "mod"), unpack());
     exp.Set(String::New(env, "fun"), unpack());
     exp.Set(String::New(env, "arity"), unpack());
@@ -387,7 +382,7 @@ class Decoder {
       return env.Undefined();
     }
 
-    const auto type = read8();
+    const auto type(read8());
     switch (type) {
       case SMALL_INTEGER_EXT:
         return decodeSmallInteger();

@@ -11,7 +11,7 @@ export const packCustom = kPackSymbol;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/explicit-module-boundary-types
 export function pack(data: any): Buffer {
   if (data?.[kPackSymbol]) {
-    return _pack(data[kPackSymbol]!());
+    return _pack(data[kPackSymbol]());
   }
   return _pack(data);
 }

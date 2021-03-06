@@ -6,9 +6,9 @@
 using namespace Napi;
 
 Value Pack(const CallbackInfo& args) {
-  const Env env = args.Env();
-
+  const Env env(args.Env());
   Encoder encoder(env);
+
   const int ret = encoder.pack(args[0]);
   if (ret == -1) {
     Error::New(env, "Out of memory.").ThrowAsJavaScriptException();
@@ -22,7 +22,7 @@ Value Pack(const CallbackInfo& args) {
 }
 
 Value Unpack(const CallbackInfo& args) {
-  const Env env = args.Env();
+  const Env env(args.Env());
   TypedArrayOf<uint8_t> contents(args[0].As<TypedArrayOf<uint8_t>>());
 
   if (contents.ByteLength() == 0) {
@@ -35,8 +35,8 @@ Value Unpack(const CallbackInfo& args) {
 }
 
 Object Init(Env env, Object exports) {
-  exports.Set(String::New(env, "pack"), Function::New(env, Pack));
-  exports.Set(String::New(env, "unpack"), Function::New(env, Unpack));
+  exports.Set("pack", Function::New(env, Pack));
+  exports.Set("unpack", Function::New(env, Unpack));
   return exports;
 }
 
