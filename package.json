@@ -8,6 +8,7 @@
   "maintainers": [
     "Typescord"
   ],
+  "license": "MIT",
   "engines": {
     "node": ">=15.0.0"
   },
