@@ -1,6 +1,6 @@
 {
 	"name": "@typescord/erlpack",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"description": "Erlpack is a fast encoder and decoder for the Erlang Term Format (version 131) for JavaScript",
