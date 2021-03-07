@@ -2,20 +2,20 @@ import * as erlpack from '../index';
 
 describe('packs', () => {
 	it('string with null byte', () => {
-		const packed = erlpack.pack('hello\x00 world');
-		const expected = Buffer.from('\x83m\x00\x00\x00\x0chello\x00 world', 'binary');
+		const packed = erlpack.pack('hello\u0000 world');
+		const expected = Buffer.from('\u0083m\u0000\u0000\u0000\u000Chello\u0000 world', 'binary');
 		expect(packed.equals(expected)).toBeTruthy();
 	});
 
 	it('string without null byte', () => {
 		const packed = erlpack.pack('hello world');
-		const expected = Buffer.from('\x83m\x00\x00\x00\x0bhello world', 'binary');
+		const expected = Buffer.from('\u0083m\u0000\u0000\u0000\u000Bhello world', 'binary');
 		expect(packed.equals(expected)).toBeTruthy();
 	});
 
 	it('dictionary', () => {
 		const expected = Buffer.from(
-			'\x83t\x00\x00\x00\x03a\x02a\x02a\x03l\x00\x00\x00\x03a\x01a\x02a\x03jm\x00\x00\x00\x01aa\x01',
+			'\u0083t\u0000\u0000\u0000\u0003a\u0002a\u0002a\u0003l\u0000\u0000\u0000\u0003a\u0001a\u0002a\u0003jm\u0000\u0000\u0000\u0001aa\u0001',
 			'binary',
 		);
 		const packed = erlpack.pack({ a: 1, '2': 2, '3': [1, 2, 3] });
@@ -23,61 +23,60 @@ describe('packs', () => {
 	});
 
 	it('false', () => {
-		const expected = Buffer.from('\x83s\x05false', 'binary');
+		const expected = Buffer.from('\u0083s\u0005false', 'binary');
 		const packed = erlpack.pack(false);
 		expect(packed.equals(expected)).toBeTruthy();
 	});
 
 	it('true', () => {
-		const expected = Buffer.from('\x83s\x04true', 'binary');
+		const expected = Buffer.from('\u0083s\u0004true', 'binary');
 		const packed = erlpack.pack(true);
 		expect(packed.equals(expected)).toBeTruthy();
 	});
 
 	it('null is nil', () => {
-		const expected = Buffer.from('\x83s\x03nil', 'binary');
+		const expected = Buffer.from('\u0083s\u0003nil', 'binary');
+		// eslint-disable-next-line unicorn/no-null
 		const packed = erlpack.pack(null);
 		expect(packed.equals(expected)).toBeTruthy();
 	});
 
 	it('undefined is nil', () => {
-		const expected = Buffer.from('\x83s\x03nil', 'binary');
-		const packed = erlpack.pack(undefined);
+		const expected = Buffer.from('\u0083s\u0003nil', 'binary');
+		const packed = erlpack.pack();
 		expect(packed.equals(expected)).toBeTruthy();
 	});
 
 	it('floats as new floats', () => {
-		expect(erlpack.pack(2.5).equals(Buffer.from('\x83F\x40\x04\x00\x00\x00\x00\x00\x00', 'binary'))).toBeTruthy();
+		expect(
+			erlpack.pack(2.5).equals(Buffer.from('\u0083F\u0040\u0004\u0000\u0000\u0000\u0000\u0000\u0000', 'binary')),
+		).toBeTruthy();
 		expect(
 			erlpack
 				.pack(51512123841234.31423412341435123412341342)
-				.equals(Buffer.from('\x83F\x42\xc7\x6c\xcc\xeb\xed\x69\x28', 'binary')),
+				.equals(Buffer.from('\u0083F\u0042\u00C7\u006C\u00CC\u00EB\u00ED\u0069\u0028', 'binary')),
 		).toBeTruthy();
 	});
 
 	it('small int', () => {
-		function check(smallInt: number) {
+		for (let index = 0; index < 256; ++index) {
 			const expected = Buffer.alloc(3);
-			expected.write('\x83a', 0, 2, 'binary');
-			expected.writeUInt8(smallInt, 2);
-			const packed = erlpack.pack(smallInt);
+			expected.write('\u0083a', 0, 2, 'binary');
+			expected.writeUInt8(index, 2);
+			const packed = erlpack.pack(index);
 			expect(expected.equals(packed)).toBeTruthy();
-		}
-
-		for (let i = 0; i < 256; ++i) {
-			check(i);
 		}
 	});
 
 	it('int32', () => {
-		expect(erlpack.pack(1024).equals(Buffer.from('\x83b\x00\x00\x04\x00', 'binary'))).toBeTruthy();
-		expect(erlpack.pack(-2147483648).equals(Buffer.from('\x83b\x80\x00\x00\x00', 'binary'))).toBeTruthy();
-		expect(erlpack.pack(2147483647).equals(Buffer.from('\x83b\x7f\xff\xff\xff', 'binary'))).toBeTruthy();
+		expect(erlpack.pack(1024).equals(Buffer.from('\u0083b\u0000\u0000\u0004\u0000', 'binary'))).toBeTruthy();
+		expect(erlpack.pack(-2147483648).equals(Buffer.from('\u0083b\u0080\u0000\u0000\u0000', 'binary'))).toBeTruthy();
+		expect(erlpack.pack(2147483647).equals(Buffer.from('\u0083b\u007F\u00FF\u00FF\u00FF', 'binary'))).toBeTruthy();
 	});
 
 	it('list', () => {
 		const expected = Buffer.from(
-			'\x83l\x00\x00\x00\x05a\x01m\x00\x00\x00\x03twoF\x40\x08\xcc\xcc\xcc\xcc\xcc\xcdm\x00\x00\x00\x04fourl\x00\x00\x00\x01m\x00\x00\x00\x04fivejj',
+			'\u0083l\u0000\u0000\u0000\u0005a\u0001m\u0000\u0000\u0000\u0003twoF\u0040\u0008\u00CC\u00CC\u00CC\u00CC\u00CC\u00CDm\u0000\u0000\u0000\u0004fourl\u0000\u0000\u0000\u0001m\u0000\u0000\u0000\u0004fivejj',
 			'binary',
 		);
 		const packed = erlpack.pack([1, 'two', 3.1, 'four', ['five']]);
@@ -85,6 +84,6 @@ describe('packs', () => {
 	});
 
 	it('empty list', () => {
-		expect(erlpack.pack([]).equals(Buffer.from('\x83j', 'binary'))).toBeTruthy();
+		expect(erlpack.pack([]).equals(Buffer.from('\u0083j', 'binary'))).toBeTruthy();
 	});
 });
