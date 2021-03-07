@@ -23,7 +23,13 @@ Value Pack(const CallbackInfo& args) {
 
 Value Unpack(const CallbackInfo& args) {
   const Env env(args.Env());
-  TypedArrayOf<uint8_t> contents(args[0].As<TypedArrayOf<uint8_t>>());
+  const Value data = args[0];
+  if (!data.IsBuffer() || !data.IsTypedArray()) {
+    TypeError::New(env, "Data must be a Buffer or a typed array.")
+        .ThrowAsJavaScriptException();
+    return env.Undefined();
+  }
+  TypedArrayOf<uint8_t> contents(data.As<TypedArrayOf<uint8_t>>());
 
   if (contents.ByteLength() == 0) {
     Error::New(env, "Zero length buffer.").ThrowAsJavaScriptException();
@@ -35,8 +41,8 @@ Value Unpack(const CallbackInfo& args) {
 }
 
 Object Init(Env env, Object exports) {
-  exports.Set("pack", Function::New(env, Pack));
-  exports.Set("unpack", Function::New(env, Unpack));
+  exports.Set("pack", Function::New(env, Pack, "pack"));
+  exports.Set("unpack", Function::New(env, Unpack, "pack"));
   return exports;
 }
 

@@ -18,13 +18,13 @@ describe('unpacks', () => {
 	});
 
 	it('binary with null byte', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083m\u0000\u0000\u0000\u000Chello\u0000 world', 'binary'))).toEqual(
+		expect(erlpack.unpack(Buffer.from('\u0083m\u0000\u0000\u0000\u000Chello\u0000 world', 'binary'))).toBe(
 			'hello\u0000 world',
 		);
 	});
 
 	it('binary without null byte', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083m\u0000\u0000\u0000\u000Bhello world', 'binary'))).toEqual('hello world');
+		expect(erlpack.unpack(Buffer.from('\u0083m\u0000\u0000\u0000\u000Bhello world', 'binary'))).toBe('hello world');
 	});
 
 	it('dictionary', () => {
@@ -37,11 +37,11 @@ describe('unpacks', () => {
 	});
 
 	it('false', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083s\u0005false', 'binary'))).toEqual(false);
+		expect(erlpack.unpack(Buffer.from('\u0083s\u0005false', 'binary'))).toBe(false);
 	});
 
 	it('true', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083s\u0004true', 'binary'))).toEqual(true);
+		expect(erlpack.unpack(Buffer.from('\u0083s\u0004true', 'binary'))).toBe(true);
 	});
 
 	it('nil token is array', () => {
@@ -59,17 +59,15 @@ describe('unpacks', () => {
 	it('floats', () => {
 		expect(
 			erlpack.unpack(Buffer.from('\u0083c2.50000000000000000000e+00\u0000\u0000\u0000\u0000\u0000', 'binary')),
-		).toEqual(2.5);
+		).toBe(2.5);
 		expect(
 			erlpack.unpack(Buffer.from('\u0083c5.15121238412343125000e+13\u0000\u0000\u0000\u0000\u0000', 'binary')),
-		).toEqual(51512123841234.31423412341435123412341342);
+		).toBe(51512123841234.31423412341435123412341342);
 	});
 
 	it('new floats', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083F\u0040\u0004\u0000\u0000\u0000\u0000\u0000\u0000', 'binary'))).toEqual(
-			2.5,
-		);
-		expect(erlpack.unpack(Buffer.from('\u0083F\u0042\u00C7\u006C\u00CC\u00EB\u00ED\u0069\u0028', 'binary'))).toEqual(
+		expect(erlpack.unpack(Buffer.from('\u0083F\u0040\u0004\u0000\u0000\u0000\u0000\u0000\u0000', 'binary'))).toBe(2.5);
+		expect(erlpack.unpack(Buffer.from('\u0083F\u0042\u00C7\u006C\u00CC\u00EB\u00ED\u0069\u0028', 'binary'))).toBe(
 			51512123841234.31423412341435123412341342,
 		);
 	});
@@ -79,25 +77,19 @@ describe('unpacks', () => {
 			const expected = Buffer.alloc(3);
 			expected.write('\u0083a', 0, 2, 'binary');
 			expected.writeUInt8(index, 2);
-			expect(erlpack.unpack(expected)).toEqual(index);
+			expect(erlpack.unpack(expected)).toBe(index);
 		}
 	});
 
 	it('int32', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083b\u0000\u0000\u0004\u0000', 'binary'))).toEqual(1024);
-		expect(erlpack.unpack(Buffer.from('\u0083b\u0080\u0000\u0000\u0000', 'binary'))).toEqual(-2147483648);
-		expect(erlpack.unpack(Buffer.from('\u0083b\u007F\u00FF\u00FF\u00FF', 'binary'))).toEqual(2147483647);
+		expect(erlpack.unpack(Buffer.from('\u0083b\u0000\u0000\u0004\u0000', 'binary'))).toBe(1024);
+		expect(erlpack.unpack(Buffer.from('\u0083b\u0080\u0000\u0000\u0000', 'binary'))).toBe(-2147483648);
+		expect(erlpack.unpack(Buffer.from('\u0083b\u007F\u00FF\u00FF\u00FF', 'binary'))).toBe(2147483647);
 	});
 
 	it('small big ints', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0001\u0001\u0002\u0003\u0004', 'binary'))).toEqual(-67305985);
-		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toEqual(67305985);
-		expect(
-			erlpack.unpack(Buffer.from('\u0083n\u0008\u0001\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008', 'binary')),
-		).toEqual('-578437695752307201');
-		expect(
-			erlpack.unpack(Buffer.from('\u0083n\u0008\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008', 'binary')),
-		).toEqual('578437695752307201');
+		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0001\u0001\u0002\u0003\u0004', 'binary'))).toBe(-67305985n);
+		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toBe(67305985n);
 		expect(() =>
 			erlpack.unpack(
 				Buffer.from('\u0083n\u000A\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000A', 'binary'),
@@ -106,22 +98,22 @@ describe('unpacks', () => {
 	});
 
 	it('large big ints', () => {
-		expect(
-			erlpack.unpack(Buffer.from('\u0083o\u0000\u0000\u0000\u0004\u0001\u0001\u0002\u0003\u0004', 'binary')),
-		).toEqual(-67305985);
-		expect(
-			erlpack.unpack(Buffer.from('\u0083o\u0000\u0000\u0000\u0004\u0000\u0001\u0002\u0003\u0004', 'binary')),
-		).toEqual(67305985);
+		expect(erlpack.unpack(Buffer.from('\u0083o\u0000\u0000\u0000\u0004\u0001\u0001\u0002\u0003\u0004', 'binary'))).toBe(
+			-67305985n,
+		);
+		expect(erlpack.unpack(Buffer.from('\u0083o\u0000\u0000\u0000\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toBe(
+			67305985n,
+		);
 		expect(
 			erlpack.unpack(
 				Buffer.from('\u0083o\u0000\u0000\u0000\u0008\u0001\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008', 'binary'),
 			),
-		).toEqual('-578437695752307201');
+		).toBe(-578437695752307201n);
 		expect(
 			erlpack.unpack(
 				Buffer.from('\u0083o\u0000\u0000\u0000\u0008\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008', 'binary'),
 			),
-		).toEqual('578437695752307201');
+		).toBe(578437695752307201n);
 		expect(() =>
 			erlpack.unpack(
 				Buffer.from(
@@ -133,7 +125,7 @@ describe('unpacks', () => {
 	});
 
 	it('atoms', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083d\u0000\u000Dguild members', 'binary'))).toEqual('guild members');
+		expect(erlpack.unpack(Buffer.from('\u0083d\u0000\u000Dguild members', 'binary'))).toBe('guild members');
 	});
 
 	it('tuples', () => {
@@ -148,7 +140,7 @@ describe('unpacks', () => {
 	});
 
 	it('compressed', () => {
-		const expected = [2, [..."it's getting hot in here."].map((x) => x.charCodeAt(0))];
+		const expected = [2, [...Buffer.from("it's getting hot in here.")]];
 		expect(
 			erlpack.unpack(
 				Buffer.from("\u0083l\u0000\u0000\u0000\u0002a\u0002k\u0000\u0019it's getting hot in here.j", 'binary'),
@@ -165,7 +157,7 @@ describe('unpacks', () => {
 	});
 
 	it('nested compressed', () => {
-		const expected = [[2, [..."it's getting hot in here."].map((x) => x.charCodeAt(0))], 3];
+		const expected = [[2, [...Buffer.from("it's getting hot in here.")]], 3];
 		expect(
 			erlpack.unpack(
 				Buffer.from(
@@ -248,7 +240,7 @@ describe('unpacks', () => {
 		).toEqual(exp);
 	});
 
-	it('can unpack from ArrayBuffers', () => {
+	it('can unpack from TypedArray', () => {
 		const data = Buffer.from('\u0083k\u0000\u000B' + helloWorldBinary, 'binary');
 		const byteBuffer = new Uint8Array(data.length);
 		for (const [index, datum] of data.entries()) {
@@ -300,7 +292,7 @@ describe('unpacks', () => {
 		).toThrow('Reading sequence past the end of the buffer.');
 	});
 
-	it('excepts from malformed string ', () => {
+	it('excepts from malformed string', () => {
 		expect(() => erlpack.unpack(Buffer.from('\u0083k\u0000\u000Bworld', 'binary'))).toThrow(
 			'Reading sequence past the end of the buffer.',
 		);

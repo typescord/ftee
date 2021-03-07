@@ -51,7 +51,11 @@ class Encoder {
       return -1;
     }
 
-    if (value.IsNumber()) {
+    if (value.IsBigInt()) {
+      bool lossless;
+      return erlpack_append_long_long(
+          &pk, (long long)value.As<BigInt>().Int64Value(&lossless));
+    } else if (value.IsNumber()) {
       double number(value.As<Number>().DoubleValue());
       if (std::fmod(number, 1) == 0) {
         if (number >= 0 && number <= UCHAR_MAX) {
@@ -69,10 +73,9 @@ class Encoder {
       }
     } else if (value.IsNull() || value.IsUndefined()) {
       return erlpack_append_nil(&pk);
-    } else if (value.IsBoolean() && value.ToBoolean() == true) {
-      return erlpack_append_true(&pk);
-    } else if (value.IsBoolean() && value.ToBoolean() == false) {
-      return erlpack_append_false(&pk);
+    } else if (value.IsBoolean()) {
+      return value.ToBoolean() ? erlpack_append_true(&pk)
+                               : erlpack_append_false(&pk);
     } else if (value.IsString()) {
       const std::string string(value.ToString().Utf8Value());
       return erlpack_append_binary(&pk, string.c_str(), string.length());

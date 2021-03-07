@@ -224,29 +224,8 @@ class Decoder {
       value |= uint64_t(read8()) << i * 8;
     }
 
-    if (digits <= 4) {
-      if (sign == 0) {
-        return Number::New(env, static_cast<uint32_t>(value));
-      }
-
-      const bool isSignBitAvailable((value & (1 << 31)) == 0);
-      if (isSignBitAvailable) {
-        int32_t negativeValue(-static_cast<int32_t>(value));
-        return Number::New(env, negativeValue);
-      }
-    }
-
-    char outBuffer[32] = {0};  // 9223372036854775807
-    const char* const formatString(sign == 0 ? "%" PRIu64 : "-%" PRIu64);
-    const int res(sprintf(outBuffer, formatString, value));
-
-    if (res < 0) {
-      THROW(env, "Unable to convert big int to string");
-      return env.Undefined();
-    }
-    const uint8_t length(static_cast<const uint8_t>(res));
-
-    return String::New(env, outBuffer, length);
+    return sign == 0 ? BigInt::New(env, value)
+                     : BigInt::New(env, -static_cast<int64_t>(value));
   }
 
   Value decodeSmallBig() {
@@ -430,8 +409,6 @@ class Decoder {
         THROW(env, "Unsupported erlang term type identifier found");
         return env.Undefined();
     }
-
-    return env.Undefined();
   }
 
  private:
