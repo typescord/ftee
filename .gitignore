@@ -15,11 +15,9 @@ pids
 *.seed
 *.pid.lock
 
-# Dependency directories
-node_modules
-
-# TypeScript cache
+# TypeScript
 *.tsbuildinfo
+dist
 
 # Optional npm cache directory
 .npm
@@ -36,4 +34,11 @@ node_modules
 prebuild
 build
 build-tmp*
-dist
+
+# Yarn 2
+.yarn/*
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*

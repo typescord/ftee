@@ -41,9 +41,9 @@ const erlpack = require('@typescord/erlpack');
 const packed = Buffer.from('', 'binary');
 let unpacked;
 try {
-  unpacked = erlpack.unpack(packed);
+	unpacked = erlpack.unpack(packed);
 } catch (e) {
-  // got an exception parsing
+	// got an exception parsing
 }
 ```
 
@@ -53,17 +53,17 @@ try {
 const { packCustom } = require('@typescord/erlpack');
 
 class User {
-  constructor(name, age) {
-    this.name = name;
-    this.age = age;
-  }
+	constructor(name, age) {
+		this.name = name;
+		this.age = age;
+	}
 
-  [packCustom]() {
-    return {
-      name: this.name,
-      age: this.age,
-    };
-  }
+	[packCustom]() {
+		return {
+			name: this.name,
+			age: this.age,
+		};
+	}
 }
 const user = new User('Jake', 23);
 const packed = pack(user);
