@@ -13,6 +13,7 @@
 		"node": ">=15.0.0"
 	},
 	"scripts": {
+		"prepublish": "yarn build-ts",
 		"install": "node-pre-gyp install --fallback-to-build",
 		"build": "node-pre-gyp install build package",
 		"build-ts": "rimraf dist && tsc -p tsconfig.prod.json",
