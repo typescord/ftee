@@ -2,7 +2,7 @@
 
 Erlpack is a fast encoder and decoder for the Erlang Term Format (version 131) for JavaScript.
 
-### Things that can be packed:
+### Packable things
 
 - [x] Null
 - [x] Booleans
@@ -21,7 +21,7 @@ Erlpack is a fast encoder and decoder for the Erlang Term Format (version 131) f
 - [ ] Exports
 - [ ] References
 
-### How to pack:
+### How to pack
 
 ```js
 const erlpack = require('@typescord/erlpack');
@@ -30,7 +30,7 @@ const packed = erlpack.pack({ a: true, list: ['of', 3, 'things', 'to', 'pack'] }
 console.log(packed);
 ```
 
-### How to unpack:
+### How to unpack
 
 Note: Unpacking requires the binary data be a `Buffer` or a typed array (e.g. `Uint8Array`).
 
@@ -46,10 +46,26 @@ try {
 }
 ```
 
-## How to make custom types packable.
+### Promises
 
 ```js
-const { packCustom } = require('@typescord/erlpack');
+const { promises: erlpack } = require('@typescord/erlpack');
+
+erlpack
+	.pack('\u0083\u006d\u0000\u0000\u0000\u000bHello world', 'binary')
+	.then(erlpack.unpack)
+	.then(console.log)
+	.catch(console.error);
+
+// in async context
+const packed = await erlpack.pack('\u0083\u006d\u0000\u0000\u0000\u000bHello world', 'binary');
+// ...
+```
+
+## How to make custom types packable
+
+```js
+const erlpack = require('@typescord/erlpack');
 
 class User {
 	constructor(name, age) {
@@ -57,13 +73,15 @@ class User {
 		this.age = age;
 	}
 
-	[packCustom]() {
+	[erlpack.packCustom]() {
 		return {
 			name: this.name,
 			age: this.age,
 		};
 	}
 }
-const user = new User('Jake', 23);
-const packed = pack(user);
+
+const jake = new User('Jake', 23);
+const jack = new User('Jack', 60n ** 2n);
+const packed = erlpack.pack({ data: [jake, 1, 2, jack, 'foo', { 4.8: [1n] }] });
 ```

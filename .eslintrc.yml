@@ -9,6 +9,7 @@ parserOptions:
   project: tsconfig.json
 rules:
   prettier/prettier: error
+  import/namespace: off
 env:
   node: true
   es2020: true

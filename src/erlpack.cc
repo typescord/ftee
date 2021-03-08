@@ -9,7 +9,16 @@ Value Pack(const CallbackInfo& args) {
   const Env env(args.Env());
   Encoder encoder(env);
 
-  const int ret = encoder.pack(args[0]);
+  Value value(args[0]);
+  if (value.IsObject()) {
+    Object object(value.ToObject());
+    if (object.HasOwnProperty(args[1])) {
+      value = value.ToObject().Get(args[1]).As<Function>().Call({});
+    }
+  }
+
+  const int ret(encoder.pack(value, args[1].As<Symbol>()));
+
   if (ret == -1) {
     Error::New(env, "Out of memory.").ThrowAsJavaScriptException();
     return env.Undefined();
@@ -23,12 +32,14 @@ Value Pack(const CallbackInfo& args) {
 
 Value Unpack(const CallbackInfo& args) {
   const Env env(args.Env());
-  const Value data = args[0];
+  const Value data(args[0]);
+
   if (!data.IsBuffer() || !data.IsTypedArray()) {
     TypeError::New(env, "Data must be a Buffer or a typed array.")
         .ThrowAsJavaScriptException();
     return env.Undefined();
   }
+
   TypedArrayOf<uint8_t> contents(data.As<TypedArrayOf<uint8_t>>());
 
   if (contents.ByteLength() == 0) {

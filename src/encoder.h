@@ -45,7 +45,8 @@ class Encoder {
     pk.allocated_size = 0;
   }
 
-  int pack(Value value, const int nestLimit = DEFAULT_RECURSE_LIMIT) {
+  int pack(Value value, Symbol packCustom,
+           const int nestLimit = DEFAULT_RECURSE_LIMIT) {
     if (nestLimit < 0) {
       Error::New(env, "Reached recursion limit").ThrowAsJavaScriptException();
       return -1;
@@ -57,6 +58,7 @@ class Encoder {
           &pk, (long long)value.As<BigInt>().Int64Value(&lossless));
     } else if (value.IsNumber()) {
       double number(value.As<Number>().DoubleValue());
+
       if (std::fmod(number, 1) == 0) {
         if (number >= 0 && number <= UCHAR_MAX) {
           return erlpack_append_small_integer(&pk, (unsigned char)number);
@@ -80,13 +82,13 @@ class Encoder {
       const std::string string(value.ToString().Utf8Value());
       return erlpack_append_binary(&pk, string.c_str(), string.length());
     } else if (value.IsArray()) {
-      auto array(value.ToObject());
-      const auto properties(array.GetPropertyNames());
-      const uint32_t length(properties.Length());
+      auto array(value.As<Array>());
+      const uint32_t length(array.Length());
+
       if (length == 0) {
         return erlpack_append_nil_ext(&pk);
       } else {
-        if (length > std::numeric_limits<uint32_t>::max() - 1) {
+        if (length >= std::numeric_limits<uint32_t>::max()) {
           Error::New(env, "List is too large.").ThrowAsJavaScriptException();
           return -1;
         }
@@ -96,10 +98,16 @@ class Encoder {
           return ret;
         }
 
-        for (uint32_t i = 0; i < length; ++i) {
-          const auto k(properties.Get(i));
-          const auto v(array.Get(k));
-          const int ret(pack(v, nestLimit - 1));
+        for (uint32_t k = 0; k < length; ++k) {
+          auto v(array.Get(k));
+          if (v.IsObject()) {
+            Object object(v.ToObject());
+            if (object.HasOwnProperty(packCustom)) {
+              v = v.ToObject().Get(packCustom).As<Function>().Call({});
+            }
+          }
+
+          const int ret(pack(v, packCustom, nestLimit - 1));
           if (ret != 0) {
             return ret;
           }
@@ -108,11 +116,11 @@ class Encoder {
         return erlpack_append_nil_ext(&pk);
       }
     } else if (value.IsObject()) {
-      auto object(value.ToObject());
+      const auto object(value.ToObject());
       const auto properties(object.GetPropertyNames());
 
       const uint32_t len(properties.Length());
-      if (len > std::numeric_limits<uint32_t>::max() - 1) {
+      if (len >= std::numeric_limits<uint32_t>::max()) {
         Error::New(env, "Dictionary has too many properties.")
             .ThrowAsJavaScriptException();
         return -1;
@@ -124,18 +132,30 @@ class Encoder {
       }
 
       for (uint32_t i = 0; i < len; ++i) {
-        const auto k(properties.Get(i));
-        const auto v(object.Get(k));
+        auto k(properties.Get(i));
 
-        std::string kStr(k.ToString());
-        const int kRet(pack(
-            std::all_of(kStr.begin(), kStr.end(), ::isdigit) ? k.ToNumber() : k,
-            nestLimit - 1));
+        const std::string kStr(k.ToString());
+        if (k.IsNumber() || std::all_of(kStr.begin(), kStr.end(), ::isdigit)) {
+          k = k.ToNumber();
+        } else {
+          k = k.ToString();
+        }
+
+        const int kRet(pack(k, packCustom, nestLimit - 1));
         if (kRet != 0) {
           return kRet;
         }
 
-        const int vRet(pack(v, nestLimit - 1));
+        auto v(object.Get(k));
+
+        if (v.IsObject()) {
+          Object object(v.ToObject());
+          if (object.HasOwnProperty(packCustom)) {
+            v = v.ToObject().Get(packCustom).As<Function>().Call({});
+          }
+        }
+
+        const int vRet(pack(v, packCustom, nestLimit - 1));
         if (vRet != 0) {
           return vRet;
         }

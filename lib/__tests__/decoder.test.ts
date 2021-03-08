@@ -94,7 +94,7 @@ describe('unpacks', () => {
 			erlpack.unpack(
 				Buffer.from('\u0083n\u000A\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000A', 'binary'),
 			),
-		).toThrow('Unable to decode big ints larger than 8 bytes');
+		).toThrow(new Error('Unable to decode big ints larger than 8 bytes'));
 	});
 
 	it('large big ints', () => {
@@ -121,7 +121,7 @@ describe('unpacks', () => {
 					'binary',
 				),
 			),
-		).toThrow('Unable to decode big ints larger than 8 bytes');
+		).toThrow(new Error('Unable to decode big ints larger than 8 bytes'));
 	});
 
 	it('atoms', () => {
@@ -254,15 +254,15 @@ describe('unpacks', () => {
 			'\u0083q\u0000\u0000\u0000\u0003a\u0002a\u0002a\u0003l\u0000\u0000\u0000\u0003a\u0001a\u0002a\u0003jm\u0000\u0000\u0000\u0001aa\u0001',
 			'binary',
 		);
-		expect(() => erlpack.unpack(data)).toThrow('Unsupported erlang term type identifier found');
+		expect(() => erlpack.unpack(data)).toThrow(new Error('Unsupported erlang term type identifier found'));
 		expect(() => erlpack.unpack(Buffer.from('\u0083k\u0000', 'binary'))).toThrow(
-			'Reading two bytes passes the end of the buffer.',
+			new Error('Reading two bytes passes the end of the buffer.'),
 		);
 	});
 
 	it('excepts from malformed array', () => {
 		expect(() => erlpack.unpack(Buffer.from('\u0083t\u0000\u0000\u0000\u0003a\u0002a\u0002a\u0003', 'binary'))).toThrow(
-			'Unpacking beyond the end of the buffer',
+			new Error('Unpacking beyond the end of the buffer'),
 		);
 	});
 
@@ -271,36 +271,51 @@ describe('unpacks', () => {
 			'\u0083t\u0000\u0000\u0000\u0004a\u0002a\u0002a\u0003l\u0000\u0000\u0000\u0003a\u0001a\u0002a\u0003jm\u0000\u0000\u0000\u0001aa\u0001',
 			'binary',
 		);
-		expect(() => erlpack.unpack(data)).toThrow('Unpacking beyond the end of the buffer');
+		expect(() => erlpack.unpack(data)).toThrow(new Error('Unpacking beyond the end of the buffer'));
 	});
 
 	it('excepts from malformed atom', () => {
 		expect(() => erlpack.unpack(Buffer.from('\u0083s\u0009true', 'binary'))).toThrow(
-			'Reading sequence past the end of the buffer.',
+			new Error('Reading sequence past the end of the buffer.'),
 		);
 	});
 
 	it('excepts from malformed integer', () => {
 		expect(() => erlpack.unpack(Buffer.from('\u0083b\u0000\u0000\u0004', 'binary'))).toThrow(
-			'Reading three bytes passes the end of the buffer.',
+			new Error('Reading three bytes passes the end of the buffer.'),
 		);
 	});
 
 	it('excepts from malformed float', () => {
 		expect(() =>
 			erlpack.unpack(Buffer.from('\u0083c2.500000000000000e+00\u0000\u0000\u0000\u0000\u0000', 'binary')),
-		).toThrow('Reading sequence past the end of the buffer.');
+		).toThrow(new Error('Reading sequence past the end of the buffer.'));
 	});
 
 	it('excepts from malformed string', () => {
 		expect(() => erlpack.unpack(Buffer.from('\u0083k\u0000\u000Bworld', 'binary'))).toThrow(
-			'Reading sequence past the end of the buffer.',
+			new Error('Reading sequence past the end of the buffer.'),
 		);
 	});
 
 	it('excepts from malformed binary', () => {
 		expect(() => erlpack.unpack(Buffer.from('\u0083m\u0000\u0000\u0000\u000Chel', 'binary'))).toThrow(
-			'Reading sequence past the end of the buffer.',
+			new Error('Reading sequence past the end of the buffer.'),
+		);
+	});
+
+	it('non-buffer', () => {
+		// @ts-expect-error just for unit test
+		expect(() => erlpack.unpack('foo')).toThrow(new TypeError('Data must be a Buffer or a typed array.'));
+	});
+
+	it('promise', async () => {
+		expect(await erlpack.promises.unpack(Buffer.from('\u0083n\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toBe(
+			67305985n,
+		);
+
+		expect(erlpack.promises.unpack(Buffer.from('\u0083m\u0000\u0000\u0000\u000Chel', 'binary'))).rejects.toEqual(
+			new Error('Reading sequence past the end of the buffer.'),
 		);
 	});
 });

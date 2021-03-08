@@ -1,5 +1,16 @@
 import * as erlpack from '../index';
 
+class User implements erlpack.WithPackCustom {
+	public constructor(public name: string, public age: number | bigint) {}
+
+	public [erlpack.packCustom](): erlpack.Packable {
+		return {
+			name: this.name,
+			age: this.age,
+		};
+	}
+}
+
 describe('packs', () => {
 	it('string with null byte', () => {
 		const packed = erlpack.pack('hello\u0000 world');
@@ -104,5 +115,47 @@ describe('packs', () => {
 
 	it('empty list', () => {
 		expect(erlpack.pack([]).equals(Buffer.from('\u0083j', 'binary'))).toBe(true);
+	});
+
+	it('custom pack symbol', () => {
+		const jake = new User('Jake', 23);
+		const jack = new User('Jack', 60n ** 2n);
+
+		expect(
+			erlpack
+				.pack({ owner: jack, users: [jake, jack] })
+				.equals(
+					Buffer.from(
+						'\u0083t\u0000\u0000\u0000\u0002m\u0000\u0000\u0000\u0005ownert\u0000\u0000\u0000\u0002m\u0000\u0000\u0000\u0004namem\u0000\u0000\u0000\u0004\u004Aackm\u0000\u0000\u0000\u0003agen\u0002\u0000\u0010\u000Em\u0000\u0000\u0000\u0005usersl\u0000\u0000\u0000\u0002t\u0000\u0000\u0000\u0002m\u0000\u0000\u0000\u0004namem\u0000\u0000\u0000\u0004\u004Aakem\u0000\u0000\u0000\u0003agea\u0017t\u0000\u0000\u0000\u0002m\u0000\u0000\u0000\u0004namem\u0000\u0000\u0000\u0004\u004Aackm\u0000\u0000\u0000\u0003agen\u0002\u0000\u0010\u000Ej',
+						'binary',
+					),
+				),
+		).toBe(true);
+
+		expect(
+			erlpack
+				.pack(jake)
+				.equals(
+					Buffer.from(
+						'\u0083t\u0000\u0000\u0000\u0002m\u0000\u0000\u0000\u0004namem\u0000\u0000\u0000\u0004\u004Aakem\u0000\u0000\u0000\u0003agea\u0017',
+						'binary',
+					),
+				),
+		).toBe(true);
+	});
+
+	it('promise version', async () => {
+		const expected = Buffer.from(
+			'\u0083l\u0000\u0000\u0000\u0005a\u0001m\u0000\u0000\u0000\u0003twoF\u0040\u0008\u00CC\u00CC\u00CC\u00CC\u00CC\u00CDm\u0000\u0000\u0000\u0004fourl\u0000\u0000\u0000\u0001m\u0000\u0000\u0000\u0004fivejj',
+			'binary',
+		);
+		const packed = await erlpack.promises.pack([1, 'two', 3.1, 'four', ['five']]);
+		expect(packed.equals(expected)).toBe(true);
+
+		expect(
+			(await erlpack.promises.pack(67305985n)).equals(
+				Buffer.from('\u0083n\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'),
+			),
+		).toBe(true);
 	});
 });
