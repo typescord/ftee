@@ -1,6 +1,6 @@
 import { Packable, WithPackCustom, TypedArray, pack as packSync, unpack as unpackSync } from '.';
 
-export async function pack(data?: Packable | WithPackCustom): Promise<Buffer> {
+export function pack(data?: Packable | WithPackCustom): Promise<Buffer> {
 	return new Promise((resolve, reject) => {
 		try {
 			resolve(packSync(data));
