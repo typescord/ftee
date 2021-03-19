@@ -33,7 +33,7 @@
 	},
 	"prettier": "@typescord/prettier-config",
 	"dependencies": {
-		"@mapbox/node-pre-gyp": "^1.0.0",
+		"@mapbox/node-pre-gyp": "^1.0.1",
 		"node-addon-api": "^3.1.0",
 		"node-gyp": "^7.1.2"
 	},
@@ -50,14 +50,14 @@
 		"typescord"
 	],
 	"devDependencies": {
-		"@types/jest": "^26.0.20",
-		"@types/node": "^14.14.32",
+		"@types/jest": "^26.0.21",
+		"@types/node": "^14.14.35",
 		"@typescord/eslint-config": "^0.1.6",
-		"@typescord/mrm-preset": "^0.1.7",
+		"@typescord/mrm-preset": "^2.0.3",
 		"@typescord/prettier-config": "^0.1.2",
-		"@typescript-eslint/eslint-plugin": "^4.16.1",
-		"@typescript-eslint/parser": "^4.16.1",
-		"eslint": "^7.21.0",
+		"@typescript-eslint/eslint-plugin": "^4.18.0",
+		"@typescript-eslint/parser": "^4.18.0",
+		"eslint": "^7.22.0",
 		"eslint-config-prettier": "^7.2.0",
 		"eslint-import-resolver-node": "^0.3.4",
 		"eslint-plugin-import": "^2.22.1",
@@ -69,7 +69,7 @@
 		"mrm": "^2.6.0",
 		"prettier": "^2.2.1",
 		"rimraf": "^3.0.2",
-		"ts-jest": "^26.5.3",
+		"ts-jest": "^26.5.4",
 		"typescript": "^4.2.3"
 	},
 	"jest": {

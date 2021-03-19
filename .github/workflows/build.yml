@@ -1,10 +1,12 @@
 name: Build
 on:
   push:
-    branches: ['**']
+    branches: [main]
+    paths-ignore: ['*.{md,txt}', LICENSE, .*config, .vscode]
     tags-ignore: ['*']
   pull_request:
-    branches: ['**']
+    branches: ['*']
+    paths-ignore: ['*.{md,txt}', LICENSE, .*config, .vscode]
 
 jobs:
   build:
@@ -25,7 +27,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Node v15
+      - name: Install Node.js v15
         uses: actions/setup-node@v2
         with:
           node-version: 15
@@ -52,7 +54,7 @@ jobs:
       image: node:15-alpine
 
     steps:
-      - name: Setup env with Node v15
+      - name: Setup env with Node.js v15
         run: |
           apk add --update
           apk add --no-cache ca-certificates git curl build-base python g++ make

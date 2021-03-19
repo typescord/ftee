@@ -1,0 +1,106 @@
+name: Release Please
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.release_created }}
+    steps:
+      - uses: GoogleCloudPlatform/release-please-action@v2
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          release-type: node
+          pull-request-title-pattern: 'chore${scope}: release${component} v${version}'
+          bump-minor-pre-major: true
+
+  prebuild:
+    name: Prebuild
+    needs: release-please
+    if: ${{ needs.release-please.outputs.released }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install Node.js v15
+        uses: actions/setup-node@v2
+        with:
+          node-version: 15
+
+      - name: Install dependencies
+        run: npx cross-env npm_config_build_from_source=true yarn install --immutable
+
+      - name: Package prebuild
+        run: yarn build
+
+      - name: Upload prebuild assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: build/stage/**/*.tar.gz
+          file_glob: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+  prebuild_musl:
+    name: Prebuild (musl)
+    needs: release-please
+    if: ${{ needs.release-please.outputs.released }}
+    runs-on: ubuntu-latest
+    container:
+      image: node:15-alpine
+
+    steps:
+      - name: Setup env with Node.js v15
+        run: |
+          apk add --update
+          apk add --no-cache ca-certificates git curl build-base python g++ make
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: npm_config_build_from_source=true yarn install --immutable
+
+      - name: Package prebuild
+        run: yarn build
+
+      - name: Upload prebuild assets
+        uses: svenstaro/upload-release-action@v2
+        with:
+          file: build/stage/**/*.tar.gz
+          file_glob: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+  publish:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    needs: release-please
+    if: ${{ needs.release-please.outputs.released }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js v15
+        uses: actions/checkout@v2
+        with:
+          node-version: 15
+
+      - name: Install dependencies
+        run: npm_config_build_from_source=true yarn install --immutable
+
+      - name: Publish to NPM
+        run: yarn npm publish --access public
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
