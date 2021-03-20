@@ -85,10 +85,5 @@
     "napi_versions": [
       3
     ]
-  },
-  "dependenciesMeta": {
-    "node-addon-api@3.1.0": {
-      "unplugged": true
-    }
   }
 }
