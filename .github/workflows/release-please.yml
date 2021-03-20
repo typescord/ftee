@@ -6,17 +6,20 @@ on:
 jobs:
   release-please:
     name: Release Please
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       released: ${{ steps.release.outputs.release_created }}
+      tag: ${{ steps.release.outputs.tag }}
     steps:
       - uses: GoogleCloudPlatform/release-please-action@v2
         id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           release-type: node
+          default-branch: main
           pull-request-title-pattern: 'chore${scope}: release${component} v${version}'
           bump-minor-pre-major: true
+          changelog-types: '[{"type":"feat","section":"Features"},{"type":"fix","section":"Bug Fixes"},{"type":"perf","section":"Performance Improvements"},{"type":"deps","section":"Dependencies"},{"type":"revert","section":"Reverts"},{"type":"docs","section":"Documentation"},{"type":"style","section":"Styles","hidden":true},{"type":"chore","section":"Miscellaneous Chores","hidden":true},{"type":"refactor","section":"Code Refactoring","hidden":true},{"type":"test","section":"Tests","hidden":true},{"type":"ci","section":"Continuous Integration","hidden":true}]'
 
   prebuild:
     name: Prebuild
@@ -52,6 +55,7 @@ jobs:
         with:
           file: build/stage/**/*.tar.gz
           file_glob: true
+          tag: ${{ needs.release-please.outputs.tag }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
   prebuild_musl:
@@ -87,6 +91,7 @@ jobs:
         with:
           file: build/stage/**/*.tar.gz
           file_glob: true
+          tag: ${{ needs.release-please.outputs.tag }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
@@ -98,7 +103,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Use Node.js v15
-        uses: actions/checkout@v2
+        uses: actions/setup-node@v2
         with:
           node-version: 15
 

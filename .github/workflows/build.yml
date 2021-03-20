@@ -51,7 +51,7 @@ jobs:
 
   build_musl:
     name: Build (musl)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container:
       image: node:15-alpine
 
