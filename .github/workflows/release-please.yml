@@ -26,7 +26,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-20.04, windows-2019, macos-11.0]
 
     steps:
       - name: Checkout repository
@@ -40,7 +40,9 @@ jobs:
           node-version: 15
 
       - name: Install dependencies
-        run: npx cross-env npm_config_build_from_source=true yarn install --immutable
+        env:
+          npm_config_build_from_source: true
+        run: yarn install --immutable
 
       - name: Package prebuild
         run: yarn build
@@ -72,7 +74,10 @@ jobs:
           submodules: true
 
       - name: Install dependencies
-        run: npm_config_build_from_source=true yarn install --immutable
+        env:
+          npm_config_build_from_source: true
+          npm_config_unsafe_perm: true
+        run: yarn install --immutable
 
       - name: Package prebuild
         run: yarn build
@@ -86,7 +91,7 @@ jobs:
 
   publish:
     name: Publish to NPM
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: release-please
     if: ${{ needs.release-please.outputs.released }}
     steps:
