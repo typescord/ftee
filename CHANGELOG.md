@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.4.3](https://www.github.com/typescord/erlpack/compare/v0.4.2...v0.4.3) (2021-03-22)
+
+
+### Bug Fixes
+
+* **erlpack:** correct typo error ([c92b062](https://www.github.com/typescord/erlpack/commit/c92b062aae78505c0d52b50716757541aa571002))
+
 ### [0.4.2](https://www.github.com/typescord/erlpack/compare/v0.4.1...v0.4.2) (2021-03-20)
 
 
