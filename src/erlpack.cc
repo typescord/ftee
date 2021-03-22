@@ -53,7 +53,7 @@ Value Unpack(const CallbackInfo& args) {
 
 Object Init(Env env, Object exports) {
   exports.Set("pack", Function::New(env, Pack, "pack"));
-  exports.Set("unpack", Function::New(env, Unpack, "pack"));
+  exports.Set("unpack", Function::New(env, Unpack, "unpack"));
   return exports;
 }
 
