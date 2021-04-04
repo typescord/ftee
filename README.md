@@ -46,10 +46,24 @@ try {
 }
 ```
 
+#### Decoding Bigs or not
+
+```js
+const erlpack = require('@typescord/erlpack');
+
+const packed = erlpack.pack(1234567891011121314n);
+
+console.log(erlpack.unpack(packed)); // 1234567891011121314n
+console.log(erlpack.unpack(packed, true)); // 1234567891011121314n
+console.log(erlpack.unpack(packed, false)); // "1234567891011121314"
+```
+
 ### Promises
 
 ```js
 const { promises: erlpack } = require('@typescord/erlpack');
+// or
+const erlpack = require('@typescord/erlpack/dist/promises');
 
 erlpack
 	.pack('\u0083\u006d\u0000\u0000\u0000\u000bHello world', 'binary')
@@ -73,7 +87,7 @@ class User {
 		this.age = age;
 	}
 
-	[erlpack.packCustom]() {
+	[erlpack.pack.custom]() {
 		return {
 			name: this.name,
 			age: this.age,

@@ -1,4 +1,7 @@
-import { Packable, WithPackCustom, TypedArray, pack as packSync, unpack as unpackSync } from '.';
+/* eslint-disable @typescript-eslint/no-namespace, import/export, no-redeclare */
+import { Packable, WithPackCustom, pack as packSync, unpack as unpackSync } from '.';
+
+export type { Packable, WithPackCustom };
 
 export function pack(data?: Packable | WithPackCustom): Promise<Buffer> {
 	return new Promise((resolve, reject) => {
@@ -9,9 +12,13 @@ export function pack(data?: Packable | WithPackCustom): Promise<Buffer> {
 		}
 	});
 }
+pack.custom = packSync.custom;
+export declare namespace pack {
+	const custom: typeof packSync.custom;
+}
 
 export function unpack<T extends Exclude<Packable, WithPackCustom> = Exclude<Packable, WithPackCustom>>(
-	data: TypedArray | Buffer,
+	data: Uint8Array | Uint8ClampedArray | Buffer,
 ): Promise<T> {
 	return new Promise((resolve, reject) => {
 		try {

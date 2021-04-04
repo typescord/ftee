@@ -318,4 +318,12 @@ describe('unpacks', () => {
 			new Error('Reading sequence past the end of the buffer.'),
 		);
 	});
+
+	it('should respect decodeBigint', () => {
+		const big = Buffer.from('\u0083n\u0008\u0000\u00A2\u0030\u00D2\u00B2\u00F4\u0010\u0022\u0011', 'binary');
+
+		expect(erlpack.unpack(big)).toBe(1234567891011121314n);
+		expect(erlpack.unpack(big, true)).toBe(1234567891011121314n);
+		expect(erlpack.unpack(big, false)).toBe('1234567891011121314');
+	});
 });

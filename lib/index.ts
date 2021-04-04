@@ -1,24 +1,12 @@
-/* eslint-disable  @typescript-eslint/no-var-requires */
+/* eslint-disable @typescript-eslint/no-var-requires, @typescript-eslint/no-namespace, import/export, no-redeclare */
 import { join } from 'path';
 import { find } from '@mapbox/node-pre-gyp';
 const erlpack = require(find(join(__dirname, '../package.json')));
 
-const packCustom = Symbol('erlpack.pack.custom');
+const kPackCustom = Symbol.for('erlpack.pack.custom');
 
-export type TypedArray =
-	| Int8Array
-	| Uint8Array
-	| Uint8ClampedArray
-	| Int16Array
-	| Uint16Array
-	| Int32Array
-	| Uint32Array
-	| BigInt64Array
-	| BigUint64Array
-	| Float32Array
-	| Float64Array;
 export interface WithPackCustom {
-	[packCustom](): Packable;
+	[kPackCustom](): Packable;
 }
 
 export type Packable =
@@ -33,14 +21,21 @@ export type Packable =
 	| { [P in string | number]: Packable };
 
 export function pack(data?: Packable): Buffer {
-	return erlpack.pack(data, packCustom);
+	return erlpack.pack(data, kPackCustom);
+}
+pack.custom = kPackCustom;
+export declare namespace pack {
+	const custom: typeof kPackCustom;
 }
 
 export function unpack<T extends Exclude<Packable, WithPackCustom> = Exclude<Packable, WithPackCustom>>(
-	data: TypedArray | Buffer,
+	data: Uint8Array | Uint8ClampedArray | Buffer,
+	/**
+	 * If it's `false`, bigs will be decoded as strings
+	 */
+	decodeBigint = true,
 ): T {
-	return erlpack.unpack(data);
+	return erlpack.unpack(data, decodeBigint);
 }
 
 export * as promises from './promises';
-export { packCustom };

@@ -23,11 +23,13 @@ class Decoder {
   static constexpr uint8_t FLOAT_LENGTH = 31;
 
  public:
-  Decoder(const Env env, const TypedArrayOf<uint8_t>& array)
+  Decoder(const Env env, const TypedArrayOf<uint8_t>& array,
+          const bool decodeBigint)
       : data(array.Data()),
         size(array.ByteLength()),
         isInvalid(false),
         offset(0),
+        decodeBigint(decodeBigint),
         env(env) {
     const auto version(read8());
     if (version != FORMAT_VERSION) {
@@ -35,9 +37,14 @@ class Decoder {
     }
   }
 
-  Decoder(Env env, const uint8_t* data_, size_t length_,
-          bool skipVersion = false)
-      : data(data_), size(length_), isInvalid(false), offset(0), env(env) {
+  Decoder(const Env env, const uint8_t* data_, const size_t length_,
+          const bool decodeBigint, const bool skipVersion = false)
+      : data(data_),
+        size(length_),
+        isInvalid(false),
+        offset(0),
+        decodeBigint(decodeBigint),
+        env(env) {
     if (!skipVersion) {
       const auto version(read8());
       if (version != FORMAT_VERSION) {
@@ -224,8 +231,33 @@ class Decoder {
       value |= uint64_t(read8()) << i * 8;
     }
 
-    return sign == 0 ? BigInt::New(env, value)
-                     : BigInt::New(env, -static_cast<int64_t>(value));
+    if (decodeBigint) {
+      return sign == 0 ? BigInt::New(env, value)
+                       : BigInt::New(env, -static_cast<int64_t>(value));
+    }
+
+    if (digits <= 4) {
+      if (sign == 0) {
+        return Number::New(env, static_cast<uint32_t>(value));
+      }
+
+      const bool isSignBitAvailable((value & (1 << 31)) == 0);
+      if (isSignBitAvailable) {
+        return Number::New(env, -static_cast<int32_t>(value));
+      }
+    }
+
+    char outBuffer[32] = {0};  // 9223372036854775807
+    const char* const formatString(sign == 0 ? "%" PRIu64 : "-%" PRIu64);
+    const int res(sprintf(outBuffer, formatString, value));
+
+    if (res < 0) {
+      THROW(env, "Unable to convert big int to string");
+      return env.Undefined();
+    }
+    const uint8_t length(static_cast<const uint8_t>(res));
+
+    return String::New(env, outBuffer, length);
   }
 
   Value decodeSmallBig() {
@@ -291,7 +323,7 @@ class Decoder {
       return env.Null();
     }
 
-    Decoder children(env, outBuffer, uncompressedSize, true);
+    Decoder children(env, outBuffer, uncompressedSize, true, true);
     Value value(children.unpack());
     delete[] outBuffer;
     return value;
@@ -416,5 +448,6 @@ class Decoder {
   const size_t size;
   bool isInvalid;
   size_t offset;
+  const bool decodeBigint;
   const Env env;
 };

@@ -3,7 +3,7 @@ import * as erlpack from '../index';
 class User implements erlpack.WithPackCustom {
 	public constructor(public name: string, public age: number | bigint) {}
 
-	public [erlpack.packCustom](): erlpack.Packable {
+	public [erlpack.pack.custom](): erlpack.Packable {
 		return {
 			name: this.name,
 			age: this.age,

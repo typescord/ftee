@@ -47,7 +47,8 @@ Value Unpack(const CallbackInfo& args) {
     return env.Undefined();
   }
 
-  Decoder decoder(env, contents);
+  Decoder decoder(env, contents,
+                  args[1].IsBoolean() ? args[1].ToBoolean() : true);
   return decoder.unpack();
 }
 
