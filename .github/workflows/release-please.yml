@@ -6,7 +6,7 @@ on:
 jobs:
   release-please:
     name: Release Please
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     outputs:
       released: ${{ steps.release.outputs.release_created }}
       tag: ${{ steps.release.outputs.tag_name }}
@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-10.15]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout repository
@@ -37,10 +37,10 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Node.js v15
+      - name: Install Node.js v${{ matrix.node }}
         uses: actions/setup-node@v2
         with:
-          node-version: 15
+          node-version: ${{ matrix.node }}
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -62,12 +62,15 @@ jobs:
     name: Prebuild (musl)
     needs: release-please
     if: ${{ needs.release-please.outputs.released }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
-      image: node:15-alpine
+      image: node:${{ matrix.node }}-alpine
+    strategy:
+      matrix:
+        node: [15] # TODO: add 16 when node:16-alpine is available
 
     steps:
-      - name: Setup env with Node.js v15
+      - name: Setup environment
         run: |
           apk add --update
           apk add --no-cache ca-certificates git curl build-base python g++ make
@@ -96,7 +99,7 @@ jobs:
 
   publish:
     name: Publish to NPM
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: release-please
     if: ${{ needs.release-please.outputs.released }}
     steps:

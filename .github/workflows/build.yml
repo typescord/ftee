@@ -14,7 +14,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-16.04, ubuntu-20.04, windows-2016, windows-2019, macos-10.15]
+        os: [ubuntu-16.04, ubuntu-latest, windows-2016, windows-latest, macos-latest]
+        node: [15, 16]
 
     steps:
       - name: Force Git to use LF
@@ -27,10 +28,10 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Node.js v15
+      - name: Install Node.js v${{ matrix.node }}
         uses: actions/setup-node@v2
         with:
-          node-version: 15
+          node-version: ${{ matrix.node }}
 
       - name: Install dependencies
         run: yarn install --immutable
@@ -51,12 +52,15 @@ jobs:
 
   build_musl:
     name: Build (musl)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     container:
-      image: node:15-alpine
+      image: node:${{ matrix.node }}-alpine
+    strategy:
+      matrix:
+        node: [15] # TODO: add 16 when node:16-alpine is available
 
     steps:
-      - name: Setup env with Node.js v15
+      - name: Setup environment
         run: |
           apk add --update
           apk add --no-cache ca-certificates git curl build-base python g++ make
