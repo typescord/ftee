@@ -320,7 +320,7 @@ class Decoder {
     if (ret != Z_OK) {
       delete[] outBuffer;
       THROW(env, "Failed to uncompresss compressed item");
-      return env.Null();
+      return env.Undefined();
     }
 
     Decoder children(env, outBuffer, uncompressedSize, true, true);
