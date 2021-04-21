@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.6.0](https://www.github.com/typescord/erlpack/compare/v0.5.0...v0.6.0) (2021-04-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* return undefined instead of null
+
+### Bug Fixes
+
+* return undefined instead of null ([d895a61](https://www.github.com/typescord/erlpack/commit/d895a616c2e42bf7ca9ef307d3dd05c2789225eb))
+* **typings:** custom property type ([58e179f](https://www.github.com/typescord/erlpack/commit/58e179fe2b8aa45f02071d7ff914b7af4f0c4cec))
+
 ## [0.5.0](https://www.github.com/typescord/erlpack/compare/v0.4.2...v0.5.0) (2021-04-04)
 
 
