@@ -23,7 +23,7 @@ export type Packable =
 export function pack(data?: Packable): Buffer {
 	return erlpack.pack(data, kPackCustom);
 }
-pack.custom = kPackCustom;
+pack['custom'] = kPackCustom;
 export declare namespace pack {
 	const custom: typeof kPackCustom;
 }

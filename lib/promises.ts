@@ -12,7 +12,7 @@ export function pack(data?: Packable | WithPackCustom): Promise<Buffer> {
 		}
 	});
 }
-pack.custom = packSync.custom;
+pack['custom'] = packSync.custom;
 export declare namespace pack {
 	const custom: typeof packSync.custom;
 }
