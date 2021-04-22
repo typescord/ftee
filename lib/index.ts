@@ -28,12 +28,12 @@ export declare namespace pack {
 	const custom: typeof kPackCustom;
 }
 
+/**
+ * @param decodeBigint If it's `false`, bigs will be decoded as strings
+ */
 export function unpack<T extends Exclude<Packable, WithPackCustom> = Exclude<Packable, WithPackCustom>>(
 	data: Uint8Array | Uint8ClampedArray | Buffer,
-	/**
-	 * If it's `false`, bigs will be decoded as strings
-	 */
-	decodeBigint = true,
+	decodeBigint = false,
 ): T {
 	return erlpack.unpack(data, decodeBigint);
 }
