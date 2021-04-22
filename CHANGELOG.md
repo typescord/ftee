@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.7.0](https://www.github.com/typescord/erlpack/compare/v0.6.0...v0.7.0) (2021-04-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* decode bigs as string by default
+
+### Features
+
+* decode bigs as string by default ([f2cda59](https://www.github.com/typescord/erlpack/commit/f2cda593ea16f3b89e6bfacbeb526c85702c72d2))
+
+
+### Documentation
+
+* add tsdoc ([7e5bb47](https://www.github.com/typescord/erlpack/commit/7e5bb476cdfbb58ab29eafedbfd0191af1a57482))
+
 ## [0.6.0](https://www.github.com/typescord/erlpack/compare/v0.5.0...v0.6.0) (2021-04-21)
 
 
