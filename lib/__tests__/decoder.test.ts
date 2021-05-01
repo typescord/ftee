@@ -88,8 +88,8 @@ describe('unpacks', () => {
 	});
 
 	it('small big ints', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0001\u0001\u0002\u0003\u0004', 'binary'))).toBe(-67305985n);
-		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toBe(67305985n);
+		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0001\u0001\u0002\u0003\u0004', 'binary'))).toBe(-67305985);
+		expect(erlpack.unpack(Buffer.from('\u0083n\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toBe(67305985);
 		expect(() =>
 			erlpack.unpack(
 				Buffer.from('\u0083n\u000A\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000A', 'binary'),
@@ -97,21 +97,17 @@ describe('unpacks', () => {
 		).toThrow(new Error('Unable to decode big ints larger than 8 bytes'));
 	});
 
-	it('large big ints', () => {
-		expect(erlpack.unpack(Buffer.from('\u0083o\u0000\u0000\u0000\u0004\u0001\u0001\u0002\u0003\u0004', 'binary'))).toBe(
-			-67305985n,
-		);
-		expect(erlpack.unpack(Buffer.from('\u0083o\u0000\u0000\u0000\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toBe(
-			67305985n,
-		);
+	it('big ints', () => {
 		expect(
 			erlpack.unpack(
 				Buffer.from('\u0083o\u0000\u0000\u0000\u0008\u0001\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008', 'binary'),
+				true,
 			),
 		).toBe(-578437695752307201n);
 		expect(
 			erlpack.unpack(
 				Buffer.from('\u0083o\u0000\u0000\u0000\u0008\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008', 'binary'),
+				true,
 			),
 		).toBe(578437695752307201n);
 		expect(() =>
@@ -120,6 +116,7 @@ describe('unpacks', () => {
 					'\u0083o\u0000\u0000\u0000\u000A\u0000\u0001\u0002\u0003\u0004\u0005\u0006\u0007\u0008\u0009\u000A',
 					'binary',
 				),
+				true,
 			),
 		).toThrow(new Error('Unable to decode big ints larger than 8 bytes'));
 	});
@@ -311,7 +308,7 @@ describe('unpacks', () => {
 
 	it('promise', async () => {
 		expect(await erlpack.promises.unpack(Buffer.from('\u0083n\u0004\u0000\u0001\u0002\u0003\u0004', 'binary'))).toBe(
-			67305985n,
+			67305985,
 		);
 
 		expect(erlpack.promises.unpack(Buffer.from('\u0083m\u0000\u0000\u0000\u000Chel', 'binary'))).rejects.toEqual(
@@ -322,8 +319,8 @@ describe('unpacks', () => {
 	it('should respect decodeBigint', () => {
 		const big = Buffer.from('\u0083n\u0008\u0000\u00A2\u0030\u00D2\u00B2\u00F4\u0010\u0022\u0011', 'binary');
 
-		expect(erlpack.unpack(big)).toBe(1234567891011121314n);
 		expect(erlpack.unpack(big, true)).toBe(1234567891011121314n);
 		expect(erlpack.unpack(big, false)).toBe('1234567891011121314');
+		expect(erlpack.unpack(big)).toBe('1234567891011121314');
 	});
 });

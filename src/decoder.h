@@ -231,11 +231,6 @@ class Decoder {
       value |= uint64_t(read8()) << i * 8;
     }
 
-    if (decodeBigint) {
-      return sign == 0 ? BigInt::New(env, value)
-                       : BigInt::New(env, -static_cast<int64_t>(value));
-    }
-
     if (digits <= 4) {
       if (sign == 0) {
         return Number::New(env, static_cast<uint32_t>(value));
@@ -245,6 +240,11 @@ class Decoder {
       if (isSignBitAvailable) {
         return Number::New(env, -static_cast<int32_t>(value));
       }
+    }
+
+    if (decodeBigint) {
+      return sign == 0 ? BigInt::New(env, value)
+                       : BigInt::New(env, -static_cast<int64_t>(value));
     }
 
     char outBuffer[32] = {0};  // 9223372036854775807
