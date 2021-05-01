@@ -1,15 +1,13 @@
 root: true
-extends:
-  - '@typescord'
-  - plugin:prettier/recommended
-  - prettier/@typescript-eslint
-plugins:
-  - prettier
+extends: ['@typescord', prettier]
+plugins: [prettier]
 parserOptions:
   project: tsconfig.json
 rules:
   prettier/prettier: error
   import/namespace: off
+  unicorn/prefer-node-protocol: off
+  unicorn/prefer-module: off
 env:
   node: true
   es2020: true
