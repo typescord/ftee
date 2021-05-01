@@ -57,7 +57,7 @@ jobs:
       image: node:${{ matrix.node }}-alpine
     strategy:
       matrix:
-        node: [15] # TODO: add 16 when node:16-alpine is available
+        node: [15, 16]
 
     steps:
       - name: Setup environment
