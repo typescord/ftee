@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.8.0](https://www.github.com/typescord/erlpack/compare/v0.7.0...v0.8.0) (2021-05-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* decode only u/i64 as bigints
+
+### Features
+
+* decode only u/i64 as bigints ([6768bb4](https://www.github.com/typescord/erlpack/commit/6768bb4ac20f054347985c7544a6ea8297c1aea8))
+
 ## [0.7.0](https://www.github.com/typescord/erlpack/compare/v0.6.0...v0.7.0) (2021-04-22)
 
 
