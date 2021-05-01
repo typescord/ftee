@@ -118,11 +118,11 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: yarn install --frozen-lockfile
         env:
           npm_config_build_from_source: true
 
       - name: Publish to NPM
-        run: npm publish --access public
+        run: yarn npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
