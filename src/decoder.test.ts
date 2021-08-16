@@ -1,3 +1,5 @@
+// Refs: https://github.com/discord/erlpack/blob/master/js/__tests__/decoder-test.js
+
 import { test } from 'tap';
 import { decode } from '.';
 
@@ -162,22 +164,6 @@ test('malformed array', (t) => {
 	t.throws(
 		() => decode(Buffer.from([131, 116, 0, 0, 0, 3, 97, 2, 97, 2, 97, 3])),
 		new Error('The value of "offset" is out of range. It must be >= 0 and <= 11. Received 12'),
-	);
-});
-
-test('malformed object', (t) => {
-	t.plan(1);
-	t.throws(
-		() => decode(Buffer.from([131, 98, 0, 0, 4])),
-		new Error('The value of "offset" is out of range. It must be >= 0 and <= 1. Received 2'),
-	);
-});
-
-test('malformed integer', (t) => {
-	t.plan(1);
-	t.throws(
-		() => decode(Buffer.from([131, 98, 0, 0, 4])),
-		new Error('The value of "offset" is out of range. It must be >= 0 and <= 1. Received 2'),
 	);
 });
 

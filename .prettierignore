@@ -3,3 +3,6 @@ build
 .yarn
 .yarnrc.yml
 .pnp.*
+coverage
+.nyc_output
+yarn.lock

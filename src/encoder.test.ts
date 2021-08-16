@@ -1,6 +1,8 @@
+// Refs: https://github.com/discord/erlpack/blob/master/js/__tests__/encoder-test.js
+
 import { test } from 'tap';
-import { encode, Packable } from '.';
 import { Encoder } from './encoder';
+import { encode, Packable } from '.';
 
 function testEncode(data: Packable, expected: Buffer) {
 	return encode(data, expected.length).equals(expected);
