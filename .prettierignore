@@ -1,7 +1,8 @@
 .vscode
+build
 .yarn
 .yarnrc.yml
-*.pnp.js
-cpp
-vendor
-dist
+.pnp.*
+coverage
+.nyc_output
+yarn.lock

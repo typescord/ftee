@@ -5,10 +5,8 @@ parserOptions:
   project: tsconfig.json
 rules:
   prettier/prettier: error
-  import/namespace: off
-  unicorn/prefer-node-protocol: off
-  unicorn/prefer-module: off
+  unicorn/no-null: off
+  unicorn/numeric-separators-style: off
 env:
   node: true
   es2020: true
-  jest: true
