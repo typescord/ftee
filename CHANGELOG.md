@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.9.0](https://www.github.com/typescord/ftee/compare/v0.8.0...v0.9.0) (2022-01-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* complete js rewrite
+
+### Code Refactoring
+
+* complete js rewrite ([4d41597](https://www.github.com/typescord/ftee/commit/4d41597582f49f4fa594ffaa3ebeaafb78b3f903))
+
 ## [0.8.0](https://www.github.com/typescord/ftee/compare/v0.7.0...v0.8.0) (2021-05-01)
 
 
