@@ -1,6 +1,6 @@
 {
 	"name": "@typescord/ftee",
-	"version": "0.9.0",
+	"version": "0.9.1",
 	"main": "build/index.js",
 	"types": "build/index.d.ts",
 	"description": "Ftee is a fast encoder and decoder for the Erlang External Term Format (version 131) written in TypeScript.",
