@@ -1,5 +1,12 @@
 # Changelog
 
+### [0.9.1](https://www.github.com/typescord/ftee/compare/v0.9.0...v0.9.1) (2022-09-01)
+
+
+### Bug Fixes
+
+* remove nodejs version limitation ([3e5d7e9](https://www.github.com/typescord/ftee/commit/3e5d7e9ec37b263cebf70ec4f2f4785e148aa147))
+
 ## [0.9.0](https://www.github.com/typescord/ftee/compare/v0.8.0...v0.9.0) (2022-01-16)
 
 
